@@ -78,3 +78,17 @@ exports.deleteConsultaById = async (req, res) => {
         return res.status(500).json({ message: 'Error eliminando consulta', error: error.message });
     }
 };
+const { publishMessage } = require('../bus/bus');
+
+exports.createConsulta = async (req, res) => {
+  try {
+    const { usuario_id, descripcion } = req.body;
+    const consulta = await Consulta.create({ usuario_id, descripcion });
+    // Publica un mensaje en el bus
+    await publishMessage('consultas', JSON.stringify(consulta));
+    res.status(201).json(consulta);
+  } catch (error) {
+    console.error('Error creando consulta:', error);
+    res.status(500).json({ message: 'Error creando consulta', error: error.message });
+  }
+};

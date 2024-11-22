@@ -1,27 +1,20 @@
-const Mensaje = require('../models/mensaje');
-
 const enviarMensaje = async (req, res) => {
     try {
-        const { consultaId, remitenteId, contenido } = req.body;
+        const { queue, message } = req.body;
 
-        const mensaje = await Mensaje.create({ consultaId, remitenteId, contenido });
+        if (!queue || !message) {
+            return res.status(400).json({ error: 'La cola y el mensaje son obligatorios' });
+        }
 
-        res.json({ message: "Mensaje enviado correctamente", mensaje });
+        const channel = global.rabbitChannel;
+        await channel.assertQueue(queue);
+        channel.sendToQueue(queue, Buffer.from(message));
+
+        res.status(200).json({ message: 'Mensaje enviado correctamente' });
     } catch (error) {
-        res.status(500).json({ message: "Error al enviar mensaje", error: error.message });
+        console.error('Error al enviar mensaje:', error);
+        res.status(500).json({ error: 'Error al enviar el mensaje' });
     }
 };
 
-const obtenerMensajes = async (req, res) => {
-    try {
-        const { consultaId } = req.params;
-
-        const mensajes = await Mensaje.findAll({ where: { consultaId } });
-
-        res.json({ mensajes });
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener mensajes", error: error.message });
-    }
-};
-
-module.exports = { enviarMensaje, obtenerMensajes };
+module.exports = { enviarMensaje };

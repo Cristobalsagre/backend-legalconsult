@@ -1,94 +1,45 @@
-const Consulta = require('../models/consulta');
-
-exports.createConsulta = async (req, res) => {
+const createConsulta = async (req, res) => {
     try {
-        const { usuario_id, descripcion } = req.body;
-
-        if (!usuario_id || !descripcion) {
-            return res.status(400).json({ message: 'Usuario y descripción son obligatorios.' });
+        const { titulo, descripcion, area } = req.body;
+        if (!titulo || !descripcion || !area) {
+            return res.status(400).json({ success: false, message: "Faltan datos requeridos" });
         }
 
-        const consulta = await Consulta.create({ usuario_id, descripcion });
-        return res.status(201).json({ message: 'Consulta creada exitosamente', consulta });
+        // Simulación de lógica para registrar consulta
+        const consulta = {
+            id: Math.floor(Math.random() * 1000),
+            titulo,
+            descripcion,
+            area,
+        };
+        console.log("Consulta creada:", consulta);
+        res.status(201).json({ success: true, data: consulta });
     } catch (error) {
-        console.error('Error creando consulta:', error);
-        return res.status(500).json({ message: 'Error creando consulta', error: error.message });
+        console.error("Error creando consulta:", error.message);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
-exports.getAllConsultas = async (req, res) => {
+const getConsultaById = async (req, res) => {
     try {
-        const consultas = await Consulta.findAll();
-        return res.status(200).json(consultas);
-    } catch (error) {
-        console.error('Error obteniendo consultas:', error);
-        return res.status(500).json({ message: 'Error obteniendo consultas', error: error.message });
-    }
-};
-
-exports.getConsultaById = async (req, res) => {
-    try {
-        const consulta = await Consulta.findByPk(req.params.id);
-
-        if (!consulta) {
-            return res.status(404).json({ message: 'Consulta no encontrada' });
+        const consultaId = req.params.consultaId;
+        if (!consultaId) {
+            return res.status(400).json({ success: false, message: "ID de consulta requerido" });
         }
 
-        return res.status(200).json(consulta);
+        // Simulación de datos obtenidos
+        const consulta = {
+            id: consultaId,
+            titulo: "Consulta Ejemplo",
+            descripcion: "Detalles de la consulta",
+            area: "Área Ejemplo",
+        };
+        console.log("Consulta obtenida:", consulta);
+        res.status(200).json({ success: true, data: consulta });
     } catch (error) {
-        console.error('Error obteniendo consulta por ID:', error);
-        return res.status(500).json({ message: 'Error obteniendo consulta por ID', error: error.message });
+        console.error("Error obteniendo consulta:", error.message);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
-exports.updateConsultaById = async (req, res) => {
-    try {
-        const consulta = await Consulta.findByPk(req.params.id);
-
-        if (!consulta) {
-            return res.status(404).json({ message: 'Consulta no encontrada' });
-        }
-
-        const { descripcion, estado } = req.body;
-
-        consulta.descripcion = descripcion || consulta.descripcion;
-        consulta.estado = estado || consulta.estado;
-
-        await consulta.save();
-
-        return res.status(200).json({ message: 'Consulta actualizada exitosamente', consulta });
-    } catch (error) {
-        console.error('Error actualizando consulta:', error);
-        return res.status(500).json({ message: 'Error actualizando consulta', error: error.message });
-    }
-};
-
-exports.deleteConsultaById = async (req, res) => {
-    try {
-        const consulta = await Consulta.findByPk(req.params.id);
-
-        if (!consulta) {
-            return res.status(404).json({ message: 'Consulta no encontrada' });
-        }
-
-        await consulta.destroy();
-        return res.status(200).json({ message: 'Consulta eliminada exitosamente' });
-    } catch (error) {
-        console.error('Error eliminando consulta:', error);
-        return res.status(500).json({ message: 'Error eliminando consulta', error: error.message });
-    }
-};
-const { publishMessage } = require('../bus/bus');
-
-exports.createConsulta = async (req, res) => {
-  try {
-    const { usuario_id, descripcion } = req.body;
-    const consulta = await Consulta.create({ usuario_id, descripcion });
-    // Publica un mensaje en el bus
-    await publishMessage('consultas', JSON.stringify(consulta));
-    res.status(201).json(consulta);
-  } catch (error) {
-    console.error('Error creando consulta:', error);
-    res.status(500).json({ message: 'Error creando consulta', error: error.message });
-  }
-};
+module.exports = { createConsulta, getConsultaById };

@@ -2,47 +2,28 @@ const amqp = require('amqplib');
 
 let channel;
 
-const connectToBus = async () => {
-  try {
-    const connection = await amqp.connect('amqp://localhost');
-    channel = await connection.createChannel();
-    console.log('Connected to RabbitMQ');
-  } catch (error) {
-    console.error('Error connecting to RabbitMQ:', error);
-  }
-};
-
-const publishMessage = async (queue, message) => {
-  try {
-    if (!channel) {
-      console.error('No RabbitMQ channel available');
-      return;
+const conectarRabbitMQ = async () => {
+    try {
+        const connection = await amqp.connect('amqp://localhost');
+        channel = await connection.createChannel();
+        console.log('Conexión a RabbitMQ exitosa.');
+    } catch (error) {
+        console.error('Error conectando a RabbitMQ:', error.message);
+        throw error;
     }
-    await channel.assertQueue(queue, { durable: false });
-    channel.sendToQueue(queue, Buffer.from(message));
-    console.log('Message sent to queue ${queue}:', message);
-  } catch (error) {
-    console.error('Error publishing message:', error);
-  }
 };
 
-const consumeMessage = async (queue, callback) => {
-  try {
-    if (!channel) {
-      console.error('No RabbitMQ channel available');
-      return;
+const enviarMensaje = async (queue, message) => {
+    try {
+        if (!channel) {
+            throw new Error('El canal de RabbitMQ no está disponible.');
+        }
+        await channel.assertQueue(queue);
+        channel.sendToQueue(queue, Buffer.from(message));
+        console.log(`Mensaje enviado a la cola "${queue}":, message`);
+    } catch (error) {
+        console.error('Error enviando mensaje a RabbitMQ:', error.message);
     }
-    await channel.assertQueue(queue, { durable: false });
-    channel.consume(queue, (msg) => {
-      if (msg !== null) {
-        console.log('Message received from queue ${queue}:', msg.content.toString());
-        callback(msg.content.toString());
-        channel.ack(msg);
-      }
-    });
-  } catch (error) {
-    console.error('Error consuming message:', error);
-  }
 };
 
-module.exports = { connectToBus, publishMessage, consumeMessage };
+module.exports = { conectarRabbitMQ, enviarMensaje };

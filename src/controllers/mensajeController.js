@@ -1,20 +1,24 @@
-const enviarMensaje = async (req, res) => {
-    try {
-        const { queue, message } = req.body;
+const mensaje = require('../models/mensaje'); // Modelo Sequelize para mensajes
 
-        if (!queue || !message) {
-            return res.status(400).json({ error: 'La cola y el mensaje son obligatorios' });
+const handleMessageQueue = async (message) => {
+    try {
+        console.log('Procesando mensaje en message-queue:', message.content.toString());
+        const { userId, contenido } = JSON.parse(message.content.toString());
+
+        if (!userId || !contenido) {
+            throw new Error('Datos incompletos para enviar mensaje.');
         }
 
-        const channel = global.rabbitChannel;
-        await channel.assertQueue(queue);
-        channel.sendToQueue(queue, Buffer.from(message));
+        // Lógica real: Registrar el mensaje en la base de datos
+        const nuevoMensaje = await Message.create({
+            userId,
+            contenido
+        });
 
-        res.status(200).json({ message: 'Mensaje enviado correctamente' });
+        console.log('Mensaje enviado con éxito:', nuevoMensaje);
     } catch (error) {
-        console.error('Error al enviar mensaje:', error);
-        res.status(500).json({ error: 'Error al enviar el mensaje' });
+        console.error('Error en handleMessageQueue:', error.message);
     }
 };
 
-module.exports = { enviarMensaje };
+module.exports = { handleMessageQueue };

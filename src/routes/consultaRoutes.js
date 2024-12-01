@@ -1,20 +1,45 @@
-const express = require('express');
-const router = express.Router();
-const consultaController = require('../controllers/consultaController');
+const createConsulta = async (req, res) => {
+    try {
+        const { titulo, descripcion, area } = req.body;
+        if (!titulo || !descripcion || !area) {
+            return res.status(400).json({ success: false, message: "Faltan datos requeridos" });
+        }
 
-// Ruta para crear una consulta
-router.post('/', consultaController.createConsulta);
+        // Simulación de lógica para registrar consulta
+        const consulta = {
+            id: Math.floor(Math.random() * 1000),
+            titulo,
+            descripcion,
+            area,
+        };
+        console.log("Consulta creada:", consulta);
+        res.status(201).json({ success: true, data: consulta });
+    } catch (error) {
+        console.error("Error creando consulta:", error.message);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
-// Ruta para obtener todas las consultas
-router.get('/', consultaController.getAllConsultas);
+const getConsultaById = async (req, res) => {
+    try {
+        const consultaId = req.params.consultaId;
+        if (!consultaId) {
+            return res.status(400).json({ success: false, message: "ID de consulta requerido" });
+        }
 
-// Ruta para obtener una consulta por ID
-router.get('/:id', consultaController.getConsultaById);
+        // Simulación de datos obtenidos
+        const consulta = {
+            id: consultaId,
+            titulo: "Consulta Ejemplo",
+            descripcion: "Detalles de la consulta",
+            area: "Área Ejemplo",
+        };
+        console.log("Consulta obtenida:", consulta);
+        res.status(200).json({ success: true, data: consulta });
+    } catch (error) {
+        console.error("Error obteniendo consulta:", error.message);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
-// Ruta para actualizar una consulta por ID
-router.put('/:id', consultaController.updateConsultaById);
-
-// Ruta para eliminar una consulta por ID
-router.delete('/:id', consultaController.deleteConsultaById);
-
-module.exports = router;
+module.exports = { createConsulta, getConsultaById };

@@ -1,36 +1,26 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { DataTypes } = require("sequelize");
+const db = require("../config/database");
 
-const Usuario = sequelize.define('Usuario', {
-    user_id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    },
-    nombre: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-    },
-    email: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-        unique: true,
-    },
-    rol: {
-        type: DataTypes.ENUM('cliente', 'abogado'),
-        allowNull: false,
-    },
-    especializacion: {
-        type: DataTypes.STRING(255),
-        allowNull: true, // Puede ser NULL para clientes.
-    },
-    creado_en: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-    },
+const User = db.define("User", {
+  nombre: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  rol: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 }, {
-    tableName: 'usuarios', // Nombre exacto de la tabla en la base de datos.
-    timestamps: false, // No queremos createdAt/updatedAt automáticos.
+  tableName: "users", // Asegúrate de que coincida con el nombre de la tabla en tu base de datos.
 });
 
-module.exports = Usuario;
+module.exports = User;

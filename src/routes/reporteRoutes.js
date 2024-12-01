@@ -1,7 +1,8 @@
 const express = require('express');
-const reporteController = require('../controllers/reporteController');
+const { createReporte } = require('../controllers/reporteController');
 const router = express.Router();
 
-router.get('/:abogadoId', reporteController.generarReporte);
+// Rutas
+router.post('/', createReporte); // Aquí se asegura de que createReporte sea una función válida
 
 module.exports = router;

@@ -1,28 +1,25 @@
-const Reporte = require('../models/reporte');
-const Usuario = require('../models/user');
-const Consulta = require('../models/consulta');
+const Reporte = require('../models/reporte'); // Modelo Sequelize para reportes
 
-const generarReporte = async (req, res) => {
+const handleProgressReports = async (message) => {
     try {
-        const { abogadoId } = req.params;
+        console.log('Procesando mensaje en progress-reports:', message.content.toString());
+        const { consultaId, descripcion, progreso } = JSON.parse(message.content.toString());
 
-        // Obtener consultas asignadas al abogado
-        const consultas = await Consulta.findAll({ where: { abogadoId } });
+        if (!consultaId || !descripcion || !progreso) {
+            throw new Error('Datos incompletos para generar reporte.');
+        }
 
-        // Generar estadísticas
-        const totalConsultas = consultas.length;
-        const consultasResueltas = consultas.filter(c => c.estado === 'resuelta').length;
+        // Lógica real: Crear reporte en la base de datos
+        const nuevoReporte = await Reporte.create({
+            consultaId,
+            descripcion,
+            progreso
+        });
 
-        const reporte = {
-            abogadoId,
-            totalConsultas,
-            consultasResueltas
-        };
-
-        res.json({ message: "Reporte generado correctamente", reporte });
+        console.log('Reporte generado con éxito:', nuevoReporte);
     } catch (error) {
-        res.status(500).json({ message: "Error al generar reporte", error: error.message });
+        console.error('Error en handleProgressReports:', error.message);
     }
 };
 
-module.exports = { generarReporte };
+module.exports = { handleProgressReports };

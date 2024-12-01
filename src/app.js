@@ -1,10 +1,16 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const mensajeRoutes = require('./routes/mensajeRoutes');
-
 const app = express();
+const mensajeRoutes = require('./routes/mensajeRoutes'); // Ajusta según tu ruta
 
-app.use(bodyParser.json());
+app.use(express.json());
+
+// Middleware
+app.use((req, res, next) => {
+    console.log(`Request: ${req.method} ${req.url}`);
+    next();
+});
+
+// Rutas
 app.use('/api/mensajes', mensajeRoutes);
 
 module.exports = app;
